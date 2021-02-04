@@ -1,0 +1,175 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "targetMG": {
+            "type": "string"
+        },
+        "tag1":  {
+            "type": "string",
+            "defaultValue": "Application Name"
+        },
+        "tag2":  {
+            "type": "string",
+            "defaultValue": "Application Owner"
+        },
+        "tag3":  {
+            "type": "string",
+            "defaultValue": "Criticality"
+        },
+        "tag4":  {
+            "type": "string",
+            "defaultValue": "Contact Email"
+        },
+        "tag5":  {
+            "type": "string",
+            "defaultValue": "Cost Center"
+        },
+        "tag6":  {
+            "type": "string",
+            "defaultValue": "Data Classification"
+        }
+    },
+    "variables": {
+        "inheritTag": "/providers/Microsoft.Authorization/policyDefinitions/cd3aa116-8754-49c9-a813-ad46512ece54",
+        "requireTag": "/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025",
+        "policyAssignmentName": "[concat('Required-Tags-', parameters('targetMG'))]",
+        "mgScope": "[tenantResourceId('Microsoft.Management/managementGroups', parameters('targetMG'))]",
+        "policyName": "Required Tags for Resource Groups",
+        "location": "eastus"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/policySetDefinitions",
+            "name": "[variables('policyName')]",
+            "apiVersion": "2018-05-01",
+            "properties": {
+                "displayName": "[variables('policyName')]",
+                "description": "This initiative enforces resource group tagging and resource tag inheritence.",
+                "metadata": {
+                    "category": "Tags"
+            },
+            "parameters": {},
+            "policyDefinitions": [
+                {
+                    "policyDefinitionId": "[variables('requireTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag1')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('inheritTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag1')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('requireTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag2')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('inheritTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag2')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('requireTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag3')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('inheritTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag3')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('requireTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag4')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('inheritTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag4')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('requireTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag5')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('inheritTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag5')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('requireTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag6')]"
+                        }
+                    }
+                },
+                {
+                    "policyDefinitionId": "[variables('inheritTag')]",
+                    "parameters": {
+                        "tagName": {
+                            "value": "[parameters('tag6')]"
+                        }
+                    }
+                }
+            ]
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "[variables('policyAssignmentName')]",
+            "apiVersion": "2019-09-01",
+            "dependsOn": [ "[resourceId('Microsoft.Authorization/policySetDefinitions', variables('policyName'))]" ],
+            "location": "[variables('location')]",
+            "properties": {
+                "displayName": "[variables('policyName')]",
+                "policyDefinitionId": "[extensionResourceId(variables('mgScope'), 'Microsoft.Authorization/policySetDefinitions', variables('policyName'))]",
+                "notScopes": [  ]
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        }
+    ],
+    "outputs": {
+        "policyId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Authorization/policySetDefinitions', variables('policyName'))]"
+        }
+    }
+}

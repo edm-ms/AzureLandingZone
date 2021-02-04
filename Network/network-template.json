@@ -1,0 +1,101 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "purpose": {
+            "type": "string",
+            "defaultValue": "webapp",
+            "maxLength": 10
+        },
+        "ipRange": {
+            "type": "string",
+            "defaultValue": "10.10.0.0",
+            "metadata": {
+                "description": "Virtual network (VNet) address space in CIDR notation."
+            }
+        },
+        "cidr": {
+            "type": "string",
+            "defaultValue": "21",
+            "allowedValues":[ "21", "22", "23", "24" ]
+        },
+        "subnetsPerVnet": {
+            "type": "string",
+            "defaultValue": "16",
+            "allowedValues": [ "8", "16"]
+        },
+        "subnetNames": {
+            "type": "array",
+            "defaultValue": [ "general", "frontend", "backend", "middleware", "database" ]
+        }
+    },
+    "variables": {
+        "regionName": "[replace(replace(replace(replace(replace(resourceGroup().location,'north','n'), 'east', 'e'),'south', 's'),'west', 'w'),'central', 'c')]",
+        "16": 4,
+        "8": 3,
+        "21": 2048,
+        "22": 1024,
+        "23": 512,
+        "24": 256,
+        "purpose": "[replace(toLower(parameters('purpose')), ' ', '')]",
+        "Octet1": "[split(parameters('ipRange'), '.')[0]]",
+        "Octet2": "[split(parameters('ipRange'), '.')[1]]",
+        "Octet3": "[split(parameters('ipRange'), '.')[2]]",
+        "addressStart": "[concat(variables('Octet1'),  '.', variables('Octet2'), '.')]",
+        "vnetName": "[concat('vnet-prd-', variables('regionName'), '-', variables('purpose'), '-', parameters('ipRange'), '_', parameters('cidr'))]",
+        "subnetCidr": "[add(int(parameters('cidr')), variables(parameters('subnetsPerVnet')))]",
+        "networkSize": "[variables(parameters('cidr'))]",
+        "subnetIncrement": "[div(variables('networkSize'), int(parameters('subnetsPerVnet')))]",
+        "copy": [
+            {
+                "name": "subIncrement",
+                "count": "[div(256, variables('subnetIncrement'))]",
+                "input": "[mul(variables('subnetIncrement'), copyIndex('subIncrement'))]"
+            },
+            {
+                "name": "octet3Array",
+                "count": "[length(parameters('subnetNames'))]",
+                "input": "[add(int(split(string(div(copyIndex('octet3Array'), length(variables('subIncrement')))), '.')[0]), int(variables('Octet3')))]"
+            },
+            {
+                "name": "octet4Array",
+                "count": "[length(parameters('subnetNames'))]",
+                "input": "[ variables('subIncrement')[mod(copyIndex('octet4Array'), length(variables('subIncrement')))] ]"
+            },
+            {
+                "name": "subNamesArray",
+                "count": "[length(parameters('subnetNames'))]",
+                "input": "[concat('sub-prd-', variables('regionName'), '-', variables('purpose'), '-', parameters('subnetNames')[copyIndex('subNamesArray')], '-', variables('addressStart'))]"
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "[variables('vnetName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[concat(parameters('ipRange'), '/', parameters('cidr'))]"
+                    ]
+                },
+            "copy": [
+                {
+                    "name": "subnets",
+                    "count": "[length(parameters('subnetNames'))]",
+                    "input": {
+                        "name": "[concat(variables('subNamesArray')[copyIndex('subnets')], variables('octet3Array')[copyIndex('subnets')], '.', variables('octet4Array')[copyIndex('subnets')], '_', variables('subnetCidr') )]",
+                        "properties": {
+                            "addressPrefix": "[concat(variables('addressStart'), variables('octet3Array')[copyIndex('subnets')], '.', variables('octet4Array')[copyIndex('subnets')], '/', variables('subnetCidr') )]"
+                        }
+                    }
+                }
+            ]
+            }
+        }
+    ],
+    "outputs": {}
+  }

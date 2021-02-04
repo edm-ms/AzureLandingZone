@@ -1,0 +1,241 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "DomainControllerIPs": {
+            "type": "array",
+            "defaultValue": [ "10.10.0.254", "10.10.0.253" ]
+        },
+        "IPsAllowedToDomainControllers": {
+            "type": "array",
+            "defaultValue": [ "10.10.0.0/20", "10.10.16.0/20" ]
+        }
+    },
+    "variables": {
+        "regionName": "[replace(replace(replace(replace(replace(resourceGroup().location,'north','n'), 'east', 'e'),'south', 's'),'west', 'w'),'central', 'c')]",
+        "nsgName": "[concat('nsg-', 'prd-', variables('regionName'), '-domaincontrollers')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[variables('nsgName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "deny_All",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 4094,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_rpc",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "49152-65535",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_sysvol",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5722",
+                            "access": "Allow",
+                            "priority": 1009,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_ldap_gc",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3268-3269",
+                            "access": "Allow",
+                            "priority": 1008,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_kerberos_passchange",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "464",
+                            "access": "Allow",
+                            "priority": 1007,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_frs",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "445",
+                            "access": "Allow",
+                            "priority": 1006,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_ldap",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "389",
+                            "access": "Allow",
+                            "priority": 1005,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_dc_frs",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "137-139",
+                            "access": "Allow",
+                            "priority": 1004,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_dc_traffic",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "135",
+                            "access": "Allow",
+                            "priority": 1003,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_ntp",
+                        "properties": {
+                            "protocol": "UDP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "123",
+                            "access": "Allow",
+                            "priority": 1002,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_kerberos_auth",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "88",
+                            "access": "Allow",
+                            "priority": 1001,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_AD_dns",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "53",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationAddressPrefixes": "[parameters('DomainControllerIPs')]",
+                            "destinationApplicationSecurityGroups": []
+                        }
+                    },
+                    {
+                        "name": "allow_DC_all",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "VirtualNetwork",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Outbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": "[parameters('IPsAllowedToDomainControllers')]",
+                            "destinationApplicationSecurityGroups": [
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

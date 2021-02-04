@@ -1,0 +1,64 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "mgtGroup": {
+        "type": "string",
+        "metadata": {
+          "description": "Management group where identity is scoped."
+        }
+      }
+    },
+    "variables": {
+      "roleDefName": "[guid(parameters('mgtGroup'))]",
+      "roleName": "Network Landing Zone Contributor",
+      "roleDescription": "This role can be assigned to shared network resources in a landing zone to allow just-enough-privilege.",
+      "actions": [
+        "Microsoft.Authorization/*/read",
+        "Microsoft.Insights/alertRules/*",
+        "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+        "Microsoft.Network/applicationSecurityGroups/read",
+        "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+        "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+        "Microsoft.Network/loadBalancers/inboundNatPools/join/action",
+        "Microsoft.Network/loadBalancers/inboundNatRules/join/action",
+        "Microsoft.Network/loadBalancers/probes/join/action",
+        "Microsoft.Network/loadBalancers/read",
+        "Microsoft.Network/networkInterfaces/*",
+        "Microsoft.Network/locations/*",
+        "Microsoft.Network/networkSecurityGroups/join/action",
+        "Microsoft.Network/networkSecurityGroups/read",
+        "Microsoft.Network/publicIPAddresses/join/action",
+        "Microsoft.Network/publicIPAddresses/read",
+        "Microsoft.Network/virtualNetworks/read",
+        "Microsoft.Network/virtualNetworks/subnets/read",
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+        "Microsoft.ResourceHealth/availabilityStatuses/read",
+        "Microsoft.Resources/deployments/*",
+        "Microsoft.Resources/subscriptions/resourceGroups/read",
+        "Microsoft.Support/*"        
+      ]
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Authorization/roleDefinitions",
+        "apiVersion": "2018-07-01",
+        "name": "[variables('roleDefName')]",
+        "properties": {
+          "roleName": "[variables('roleName')]",
+          "description": "[variables('roleDescription')]",
+          "type": "customRole",
+          "isCustom": true,
+          "permissions": [
+            {
+              "actions": "[variables('actions')]",
+              "notActions": []
+            }
+          ],
+          "assignableScopes": [
+            "[concat('/providers/Microsoft.Management/managementGroups/', parameters('mgtGroup'))]"
+          ]
+        }
+      }
+    ]
+  }
