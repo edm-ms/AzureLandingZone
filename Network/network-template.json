@@ -95,6 +95,18 @@
                 }
             ]
             }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/providers/locks",
+            "apiVersion": "2016-09-01",
+            "name": "[concat(variables('vnetName'), '/Microsoft.Authorization/', variables('purpose'), 'NetworkDoNotDelete')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]"
+            ],
+            "comments": "Resource lock on virtual network",
+            "properties": {
+                "level": "CannotDelete"
+            }
         }
     ],
     "outputs": {}
