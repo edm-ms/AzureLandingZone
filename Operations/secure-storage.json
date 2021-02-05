@@ -1,0 +1,113 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appName": {
+            "type": "string",
+            "maxLength": 10
+        },
+        "ipAddressAllowed": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [ "Standard_LRS", "Standard_GRS" ]
+        },
+        "deleteRetentionDays": {
+            "type": "int",
+            "defaultValue": 14
+        },
+        "advancedThreatProtectionEnabled": {
+        "type": "bool",
+        "defaultValue": true
+        }
+
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "regionName": "[replace(replace(replace(replace(replace(variables('location'),'north','n'), 'east', 'e'),'south', 's'),'west', 'w'),'central', 'c')]",
+        "appName": "[replace(toLower(parameters('appName')), ' ', '')]",
+        "storageName": "[concat('saprd', variables('regionName'), variables('appName'), take(uniqueString(resourceGroup().id), 5))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('storageName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "tags": {
+                "Environment": "Production",
+                "Application": "[parameters('appName')]"
+            },
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "[parameters('sku')]"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "supportsHttpsTrafficOnly": true,
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": false,
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "day": "[parameters('deleteRetentionDays')]"
+                },
+                "networkAcls": {
+                    "bypass": "none",
+                    "ipRules": [
+                        {
+                            "value": "[parameters('ipAddressAllowed')]",
+                            "action": "Allow"
+                        }
+                    ],
+                    "defaultAction": "Deny"
+                }
+            },
+            "resources": [
+                {
+                    "condition": "[parameters('advancedThreatProtectionEnabled')]",
+                    "type": "providers/advancedThreatProtectionSettings",
+                    "name": "Microsoft.Security/current",
+                    "apiVersion": "2019-01-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]"
+                    ],
+                    "properties": {
+                        "isEnabled": true
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(variables('storageName'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+            ],
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "Standard"
+            },
+            "properties": {
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": "[parameters('deleteRetentionDays')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/providers/locks",
+            "apiVersion": "2016-09-01",
+            "name": "[concat(variables('storageName'), '/Microsoft.Authorization/storageDoNotDelete')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]"
+            ],
+            "comments": "Resource lock on storage account",
+            "properties": {
+                "level": "CannotDelete"
+            }
+        }
+    ],
+    "outputs": {}
+}
