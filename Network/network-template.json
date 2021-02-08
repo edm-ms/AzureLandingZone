@@ -27,6 +27,10 @@
         "subnetNames": {
             "type": "array",
             "defaultValue": [ "general", "frontend", "backend", "middleware", "database" ]
+        },
+        "vnetDNS": {
+            "type": "array",
+            "defaultValue": [ "172.16.254.254", "172.16.254.253" ]
         }
     },
     "variables": {
@@ -82,18 +86,21 @@
                         "[concat(parameters('ipRange'), '/', parameters('cidr'))]"
                     ]
                 },
-            "copy": [
-                {
-                    "name": "subnets",
-                    "count": "[length(parameters('subnetNames'))]",
-                    "input": {
-                        "name": "[concat(variables('subNamesArray')[copyIndex('subnets')], variables('octet3Array')[copyIndex('subnets')], '.', variables('octet4Array')[copyIndex('subnets')], '_', variables('subnetCidr') )]",
-                        "properties": {
-                            "addressPrefix": "[concat(variables('addressStart'), variables('octet3Array')[copyIndex('subnets')], '.', variables('octet4Array')[copyIndex('subnets')], '/', variables('subnetCidr') )]"
+                "dhcpOptions": {
+                    "dnsServers": "[parameters('vnetDNS')]"
+                },
+                "copy": [
+                    {
+                        "name": "subnets",
+                        "count": "[length(parameters('subnetNames'))]",
+                        "input": {
+                            "name": "[concat(variables('subNamesArray')[copyIndex('subnets')], variables('octet3Array')[copyIndex('subnets')], '.', variables('octet4Array')[copyIndex('subnets')], '_', variables('subnetCidr') )]",
+                            "properties": {
+                                "addressPrefix": "[concat(variables('addressStart'), variables('octet3Array')[copyIndex('subnets')], '.', variables('octet4Array')[copyIndex('subnets')], '/', variables('subnetCidr') )]"
+                            }
                         }
                     }
-                }
-            ]
+                ]
             }
         },
         {
