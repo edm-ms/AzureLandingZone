@@ -10,7 +10,7 @@
       }
     },
     "variables": {
-      "roleDefName": "[guid(parameters('mgtGroup'))]",
+      "roleDefName": "[guid(deployment(), parameters('mgtGroup'))]",
       "roleName": "Application Owner",
       "roleDescription": "Contributor role granted for application/operations team at resource group level.",
       "actions": [
