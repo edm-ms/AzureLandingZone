@@ -10,7 +10,7 @@
       }
     },
     "variables": {
-      "roleDefName": "[guid(parameters('mgtGroup'))]",
+      "roleDefName": "[guid(deployment().name, parameters('mgtGroup'))]",
       "roleName": "Network Landing Zone Contributor",
       "roleDescription": "This role can be assigned to shared network resources in a landing zone to allow just-enough-privilege.",
       "actions": [

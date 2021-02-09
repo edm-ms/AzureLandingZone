@@ -10,7 +10,7 @@
       }
     },
     "variables": {
-      "roleDefName": "[guid(parameters('mgtGroup'))]",
+      "roleDefName": "[guid(deployment().name, parameters('mgtGroup'))]",
       "roleName": "Subscription Owner",
       "roleDescription": "Delegated role for subscription owner derived from subscription Owner role.",
       "actions": [

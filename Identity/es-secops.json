@@ -10,7 +10,7 @@
       }
     },
     "variables": {
-      "roleDefName": "[guid(parameters('mgtGroup'))]",
+      "roleDefName": "[guid(deployment().name, parameters('mgtGroup'))]",
       "roleName": "Security Operations",
       "roleDescription": "Security administrator role with a horizontal view across the entire Azure estate and the Azure Key Vault purge policy.",
       "actions": [
