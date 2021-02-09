@@ -10,7 +10,7 @@
       }
     },
     "variables": {
-      "roleDefName": "[guid(deployment(), parameters('mgtGroup'))]",
+      "roleDefName": "[guid(deployment().name, parameters('mgtGroup'))]",
       "roleName": "Network Management",
       "roleDescription": "Platform-wide global connectivity management: Virtual networks, UDRs, NSGs, NVAs, VPN, Azure ExpressRoute, and others.",
       "actions": [
