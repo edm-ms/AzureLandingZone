@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "mgtGroup": {
+        "type": "string",
+        "metadata": {
+          "description": "Management group where identity is scoped."
+        }
+      }
+    },
+    "variables": {
+      "roleDefName": "[guid(parameters('mgtGroup'))]",
+      "roleName": "Application Owner",
+      "roleDescription": "Contributor role granted for application/operations team at resource group level.",
+      "actions": [
+        "*"
+      ],
+      "notActions": [
+        "Microsoft.Authorization/*/write", 
+        "Microsoft.Network/publicIPAddresses/write", 
+        "Microsoft.Network/virtualNetworks/write", 
+        "Microsoft.KeyVault/locations/deletedVaults/purge/action"
+      ]
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Authorization/roleDefinitions",
+        "apiVersion": "2018-07-01",
+        "name": "[variables('roleDefName')]",
+        "properties": {
+          "roleName": "[variables('roleName')]",
+          "description": "[variables('roleDescription')]",
+          "type": "customRole",
+          "isCustom": true,
+          "permissions": [
+            {
+              "actions": "[variables('actions')]",
+              "notActions": "[variables('notActions')]"
+            }
+          ],
+          "assignableScopes": [
+            "[concat('/providers/Microsoft.Management/managementGroups/', parameters('mgtGroup'))]"
+          ]
+        }
+      }
+    ]
+  }

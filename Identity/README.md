@@ -1,8 +1,11 @@
 # Deploy ARM Templates
 
-The following are ARM templates you may use to deploy common patterns into your subscriptions.
+The following are ARM templates that build custom IAM roles scoped to a management group.
 
 | Description | ARM Template |
 | --- | --- |
-| Shared Network User Role  | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fedm-ms%2FAzureLandingZone%2Fmain%2FIdentity%2Flz-network-user.json)
-
+| Shared Network User  | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fedm-ms%2FAzureLandingZone%2Fmain%2FIdentity%2Flz-network-user.json)
+| NetOps  | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fedm-ms%2FAzureLandingZone%2Fmain%2FIdentity%2Fes-netops.json)
+| SecOps  | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fedm-ms%2FAzureLandingZone%2Fmain%2FIdentity%2Fes-secops.json)
+| SubOwner | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fedm-ms%2FAzureLandingZone%2Fmain%2FIdentity%2Fes-subscription-owner.json)
+| AppOwner  | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fedm-ms%2FAzureLandingZone%2Fmain%2FIdentity%2Fes-application-owner.json)
