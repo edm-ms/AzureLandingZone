@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonDNSzones": {
+            "type": "array",
+            "defaultValue": [
+                "privatelink.blob.core.windows.net",
+                "privatelink.file.core.windows.net",
+                "privatelink.dfs.core.windows.net",
+                "privatelink.vaultcore.azure.net",
+                "privatelink.azurecr.io",
+                "privatelink.database.windows.net",
+                "privatelink.mariadb.database.azure.com",
+                "privatelink.mysql.database.azure.com",
+                "privatelink.postgres.database.azure.com",
+                "privatelink.documents.azure.com",
+                "privatelink.mongo.cosmos.azure.com",
+                "privatelink.cassandra.cosmos.azure.com"
+            ]
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2018-09-01",
+            "copy": {
+                "count": "[length(parameters('commonDNSzones'))]",
+                "name": "dnsLoop"
+            },
+            "name": "[parameters('commonDNSzones')[copyIndex()]]",
+            "location": "global"
+        }
+    ]
+}
