@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "breakGlassUpn": {
+            "type": "string",
+            "defaultValue": "breakglass@contoso.com"
+        },
+        "logWorkspaceId": {
+            "type": "string",
+            "defaultValue": "/subscriptions/8817c2d9-ff99-4ef7-bfe3-8e79848ea575/resourcegroups/cntso-mgmt/providers/microsoft.operationalinsights/workspaces/cntso-9b5715a0-5651-4da2-8eba-ba95fffd2fac"
+        },
+        "actionGroupId": {
+            "type": "string",
+            "defaultValue": "/subscriptions/8817c2d9-ff99-4ef7-bfe3-8e79848ea575/resourcegroups/cntso-mgmt/providers/microsoft.insights/actiongroups/cloud-team"
+        }
+    },
+    "variables": {
+        "query": "[concat('SigninLogs | where OperationName == \"Sign-in activity\" | where UserPrincipalName == \"', parameters('breakGlassUpn'), '\"\r\n| where ResultType == 0\r\n\r\n')]",
+        "alertName": "Alert for Break Glass Account Logon",
+        "alertEmailSubject": "Break Glass Account Login Detected"
+    },
+    "resources": [
+        {
+            "type": "microsoft.insights/scheduledqueryrules",
+            "apiVersion": "2018-04-16",
+            "name": "[variables('alertName')]",
+            "location": "eastus",
+            "properties": {
+                "enabled": "true",
+                "source": {
+                    "query": "[variables('query')]",
+                    "authorizedResources": [],
+                    "dataSourceId": "[parameters('logWorkspaceId')]",
+                    "queryType": "ResultCount"
+                },
+                "schedule": {
+                    "frequencyInMinutes": 5,
+                    "timeWindowInMinutes": 60
+                },
+                "action": {
+                    "severity": "1",
+                    "aznsAction": {
+                        "actionGroup": [
+                            "[parameters('actionGroupId')]"
+                        ],
+                        "emailSubject": "[variables('alertEmailSubject')]"
+                    },
+                    "trigger": {
+                        "thresholdOperator": "GreaterThan",
+                        "threshold": 1
+                    },
+                    "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction"
+                }
+            }
+        }
+    ]
+}
