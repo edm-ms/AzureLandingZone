@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "mgtGroup": {
+        "type": "string",
+        "metadata": {
+          "description": "Management group where identity is scoped."
+        }
+      }
+    },
+    "variables": {
+      "roleDefName": "[guid(deployment().name, parameters('mgtGroup'))]",
+      "roleName": "Resource Lock Creator",
+      "roleDescription": "Allows the creation, but not removal of resource locks.",
+      "actions": [
+        "*/read", 
+        "Microsoft.Authorization/locks/read", 
+        "Microsoft.Authorization/locks/write", 
+        "Microsoft.Support/*"
+      ]
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Authorization/roleDefinitions",
+        "apiVersion": "2018-07-01",
+        "name": "[variables('roleDefName')]",
+        "properties": {
+          "roleName": "[variables('roleName')]",
+          "description": "[variables('roleDescription')]",
+          "type": "customRole",
+          "isCustom": true,
+          "permissions": [
+            {
+              "actions": "[variables('actions')]",
+              "notActions": []
+            }
+          ],
+          "assignableScopes": [
+            "[concat('/providers/Microsoft.Management/managementGroups/', parameters('mgtGroup'))]"
+          ]
+        }
+      }
+    ]
+  }
