@@ -28,12 +28,6 @@
         "metadata": {
           "description": "The list of email addresses to send the budget notification to when the threshold is exceeded."
         }
-      },
-      "resourceGroupName": {
-        "type": "string",
-        "metadata": {
-          "description": "The set of values for the first filter"
-        }
       }
     },
     "variables": {
@@ -41,8 +35,7 @@
       "year": "[variables('dateSplit')[0]]",
       "month": "[variables('dateSplit')[1]]",
       "startDate": "[concat(variables('year'), '-', variables('month'), '-', '01')]",
-      "email": [ "[parameters('contactEmail')]" ],
-      "resourceGroup": [ "[parameters('resourceGroupName')]" ]
+      "email": [ "[parameters('contactEmail')]" ]
     },
     "resources": [
 
@@ -50,7 +43,7 @@
         "name": "assignBudget",
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "2019-10-01",
-        "resourceGroup": "[parameters('resourceGroupName')]",
+        "resourceGroup": "[resourceGroup().name]",
         "properties": {
             "mode": "Incremental",
             "template": {
@@ -82,7 +75,7 @@
                         "dimensions": {
                           "name": "ResourceGroupName",
                           "operator": "In",
-                          "values": "[variables('resourceGroup')]"
+                          "values": "[resourceGroup().name]"
                         }
                       }
                     ]
